@@ -1,6 +1,9 @@
 package com.example.android.islamicfinancenews;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -44,8 +47,23 @@ public class MainActivity
                 startActivity(intent);
             }
         });
-        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
+
+        } else {
+
+            mEmptyStateTextView.setText(R.string.no_internet_connection);
+            //swipe.setRefreshing(false);
+        }
+
     }
+
 
     @Override
     public Loader<List<News>> onCreateLoader(int id, Bundle args) {
@@ -55,6 +73,7 @@ public class MainActivity
     @Override
     public void onLoadFinished(Loader<List<News>> loader, List<News> data) {
         mEmptyStateTextView.setText(R.string.no_news);
+
         swipe.setRefreshing(false);
         if (data != null) {
             adapter.setNotifyOnChange(false);
@@ -62,6 +81,8 @@ public class MainActivity
             adapter.setNotifyOnChange(true);
             adapter.addAll(data);
         }
+
+
     }
 
     @Override
@@ -72,5 +93,6 @@ public class MainActivity
     @Override
     public void onRefresh() {
         getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+
     }
 }
